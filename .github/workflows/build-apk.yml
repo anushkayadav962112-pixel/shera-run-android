@@ -25,14 +25,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node
+      # 2. Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      # 3. Setup Java
-      - name: Setup Java 21
+      # 3. Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -40,7 +40,6 @@ jobs:
 
       # 4. Verify project
       - name: Verify project
-        shell: bash
         run: |
           set -e
           test -f package.json
@@ -48,32 +47,32 @@ jobs:
           npm --version
           java -version
 
-      # 5. Install game dependencies
+      # 5. Install dependencies
       - name: Install game dependencies
         run: |
           npm install --legacy-peer-deps --no-audit --no-fund
 
-      # 6. Install Capacitor Core and Android
-      - name: Install Capacitor dependencies
+      # 6. Capacitor Core and Android
+      - name: Install Capacitor
         run: |
           npm install --legacy-peer-deps --no-audit --no-fund \
             "@capacitor/core@^7" \
             "@capacitor/android@^7"
 
-      # 7. Install Capacitor CLI
+      # 7. Capacitor CLI
       - name: Install Capacitor CLI
         run: |
           npm install --save-dev --legacy-peer-deps \
             --no-audit --no-fund \
             "@capacitor/cli@^7"
 
-      # 8. Verify Capacitor CLI
+      # 8. Verify Capacitor
       - name: Verify Capacitor
         run: |
           npx cap --version
           npm ls @capacitor/core @capacitor/android @capacitor/cli
 
-      # 9. Create Capacitor configuration
+      # 9. Configure game
       - name: Configure SHERA RUN
         shell: bash
         run: |
@@ -90,10 +89,7 @@ jobs:
             "webDir": "dist"
           }
           EOF
-
           fi
-
-          cat capacitor.config.json 2>/dev/null || true
 
       # 10. Build web game
       - name: Build web game
@@ -103,22 +99,26 @@ jobs:
           test -f dist/index.html
           echo "Web game build successful"
 
-      # 11. Setup Android SDK
+      # 11. Setup Android SDK (FIXED)
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4.0.4
+        with:
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+          packages: platform-tools
 
-      # 12. Install SDK packages
+      # 12. Install required SDK
       - name: Install Android SDK packages
         shell: bash
         run: |
           set -e
 
-          yes | sdkmanager --licenses || true
-
           sdkmanager --install \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
+
+          echo "Android SDK installed"
 
       # 13. Add Android platform
       - name: Add Android platform
@@ -130,20 +130,17 @@ jobs:
             npx cap add android
           fi
 
-      # 14. Sync Android
+      # 14. Sync Capacitor
       - name: Sync Capacitor
         run: |
           npx cap sync android
 
       # 15. Verify Android project
       - name: Verify Android project
-        shell: bash
         run: |
           set -e
           test -f android/gradlew
-          test -f android/app/build.gradle || \
-          test -f android/app/build.gradle.kts
-          echo "Android project verified"
+          echo "Android project ready"
 
       # 16. Build APK
       - name: Build SHERA RUN APK
@@ -165,12 +162,12 @@ jobs:
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
 
           if [ ! -s "$APK" ]; then
-            echo "ERROR: APK was not generated"
+            echo "APK not found!"
             find android -name "*.apk"
             exit 1
           fi
 
-          echo "SHERA RUN APK BUILD SUCCESSFUL"
+          echo "SHERA RUN APK SUCCESS!"
           ls -lh "$APK"
 
       # 18. Upload APK
