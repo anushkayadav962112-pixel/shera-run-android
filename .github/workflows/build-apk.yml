@@ -1,0 +1,104 @@
+
+name: Build SHERA RUN Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shera-run-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build SHERA RUN APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Verify project
+        shell: bash
+        run: |
+          set -e
+          test -f package.json
+          echo "Project found"
+          node --version
+          java -version
+          npm --version
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Verify Capacitor
+        run: npx cap --version
+
+      - name: Build web game
+        run: npm run build
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Add Android platform
+        shell: bash
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build SHERA RUN APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --stacktrace
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK"
+          ls -lh "$APK"
+          echo "APK BUILD SUCCESSFUL"
+
+      - name: Upload SHERA RUN APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHERA-RUN-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
