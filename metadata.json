@@ -1,0 +1,6 @@
+{
+  "name": "SHERA RUN",
+  "description": "Premium 3D Endless Runner – Run as Shera the White Lion through four fantasy kingdoms.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

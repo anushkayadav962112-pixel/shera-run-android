@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #060914;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: none;
+  }
+}
+
+.font-display {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Android Notch, Punch-Hole & Gesture Bar Safe-Area Padding */
+.safe-area-frame {
+  padding-top: max(0.625rem, env(safe-area-inset-top));
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
+  padding-left: max(0.625rem, env(safe-area-inset-left));
+  padding-right: max(0.625rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 640px) {
+  .safe-area-frame {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* Royal metallic gold text treatment */
+.text-royal-gold {
+  background: linear-gradient(180deg, #fff6c9 0%, #ffd24c 45%, #d98200 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.75));
+}
+
+/* Clean custom scrollbars inside modals */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 999px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.55);
+  border-radius: 999px;
+}
